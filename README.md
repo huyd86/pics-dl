@@ -31,10 +31,10 @@ pip install -r requirements.txt
 
 Run normally
 ```bash
-python3 dl.py
+python3 dl.py --max-pages 3
 ```
 
 Run in dry mode
 ```bash
-python3 dl.py --dry-run
+python3 dl.py --dry-run --max-pages 3
 ```
