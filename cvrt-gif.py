@@ -78,7 +78,7 @@ def create_gif(
 # Example usage
 if __name__ == "__main__":
     create_gif(
-        image_folder="images",
+        image_folder="downloads",
         output_path="output.gif",
         fps=1,
         resize=(512, 512),           # Bounding box size
