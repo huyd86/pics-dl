@@ -45,28 +45,38 @@ def get_full_image_url(image_page_url):
     img = soup.select_one('img#img')
     return img['src'] if img else None
 
-def download_image(img_url, save_dir='downloads', dry_run=False):
+def download_image(img_url, save_dir='downloads', dry_run=False, timeout=10):
     os.makedirs(save_dir, exist_ok=True)
     filename = os.path.join(save_dir, img_url.split('/')[-1])
 
+    if os.path.exists(filename):
+        print(f"Image already exists: {filename}, skipping.")
+        return False
+
     if dry_run:
         print(f"[DRY RUN] Would download: {img_url} -> {filename}")
-    else:
-        print(f"Downloading: {img_url}")
-        try:
-            res = requests.get(img_url, headers=HEADERS)
-            if res.status_code == 200:
-                with open(filename, 'wb') as f:
-                    f.write(res.content)
-                print(f"Saved to: {filename}")
-            else:
-                print(f"Failed to download image: {img_url}")
-        except SSLError as ssl_err:
-            logging.warning(f"SSL error while downloading {img_url}: {ssl_err}. Skipping...")
-        except Exception as e:
-            logging.error(f"Error while downloading {img_url}: {e}. Skipping...")
+        return False
 
-def download_gallery_images(base_url, max_pages, save_dir="downloads", dry_run=False):
+    print(f"Downloading: {img_url}")
+    try:
+        res = requests.get(img_url, headers=HEADERS, timeout=timeout)
+        if res.status_code == 200:
+            with open(filename, 'wb') as f:
+                f.write(res.content)
+            print(f"Saved to: {filename}")
+            return True
+        else:
+            print(f"Failed to download image: {img_url}")
+            return False
+    except SSLError as ssl_err:
+        logging.warning(f"SSL error while downloading {img_url}: {ssl_err}. Skipping...")
+    except requests.exceptions.Timeout:
+        logging.warning(f"Timeout while downloading {img_url}. Skipping...")
+    except Exception as e:
+        logging.error(f"Error while downloading {img_url}: {e}. Skipping...")
+    return False
+
+def download_gallery_images(base_url, max_pages, save_dir="downloads", dry_run=False, timeout=10):
     image_page_urls = get_image_page_urls(base_url, max_pages)
     print(f"Found {len(image_page_urls)} image pages.")
 
@@ -74,8 +84,8 @@ def download_gallery_images(base_url, max_pages, save_dir="downloads", dry_run=F
         print(f"[{idx+1}/{len(image_page_urls)}] Getting full image from {url}")
         full_img_url = get_full_image_url(url)
         if full_img_url:
-            download_image(full_img_url, save_dir=save_dir, dry_run=dry_run)
-            if not dry_run:
+            downloaded = download_image(full_img_url, save_dir=save_dir, dry_run=dry_run, timeout=timeout)
+            if downloaded:
                 time.sleep(1)
 
 if __name__ == '__main__':
@@ -84,6 +94,13 @@ if __name__ == '__main__':
     parser.add_argument('--max-pages', type=int, required=True, help='Maximum number of gallery pages to parse')
     parser.add_argument('--base-url', type=str, required=True, help='Gallery base URL')
     parser.add_argument('--save-dir', type=str, default='downloads', help='Directory to save images')
+    parser.add_argument('--timeout', type=int, default=10, help='Download timeout in seconds per image')
     args = parser.parse_args()
 
-    download_gallery_images(args.base_url, args.max_pages, save_dir=args.save_dir, dry_run=args.dry_run)
+    download_gallery_images(
+        args.base_url,
+        args.max_pages,
+        save_dir=args.save_dir,
+        dry_run=args.dry_run,
+        timeout=args.timeout
+    )

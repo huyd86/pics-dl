@@ -15,6 +15,7 @@ def process_row(url, max_pages, gif_name):
     create_gif(
         image_folder=out_dir,
         output_path=gif_name,
+        resize=(512, 512),
         fps=1,              # Adjust as necessary
         padding_color=(0,0,0)
     )
