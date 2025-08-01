@@ -40,6 +40,8 @@ Thumbs.db
 # Optional: comment out if you want to commit downloaded images
 downloads/
 images/
+queue.txt
+urls.txt
 
 # Temporary data/cache
 *.bak

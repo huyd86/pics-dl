@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image, ImageOps
 import imageio
 from tqdm import tqdm
-
+import argparse
 
 def create_gif(
     image_folder,
@@ -38,7 +38,6 @@ def create_gif(
 
     frames = []
 
-    # Choose resampling method
     try:
         resample = Image.Resampling.LANCZOS
     except AttributeError:
@@ -57,7 +56,6 @@ def create_gif(
             new_w, new_h = int(orig_w * ratio), int(orig_h * ratio)
             img_resized = img.resize((new_w, new_h), resample)
 
-            # Create padded canvas
             canvas = Image.new("RGB", (max_w, max_h), padding_color)
             offset = ((max_w - new_w) // 2, (max_h - new_h) // 2)
             canvas.paste(img_resized, offset)
@@ -74,13 +72,26 @@ def create_gif(
 
     print(f"✅ GIF saved to: {output_path}")
 
-
-# Example usage
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Create a GIF from images in a folder.")
+    parser.add_argument("--image_folder", type=str, default="downloads",
+                        help="Path to the folder containing images")
+    parser.add_argument("--output", type=str, default="output.gif",
+                        help="Output GIF file path")
+    parser.add_argument("--fps", type=int, default=1,
+                        help="Frames per second")
+    parser.add_argument("--resize", nargs=2, type=int, metavar=('width', 'height'),
+                        default=[512, 512],
+                        help="Resize images to WIDTH HEIGHT (default: 512 512)")
+    parser.add_argument("--padding_color", nargs=3, type=int, metavar=('R', 'G', 'B'), default=[0, 0, 0],
+                        help="RGB padding color (e.g., --padding_color 0 0 0)")
+
+    args = parser.parse_args()
+
     create_gif(
-        image_folder="downloads",
-        output_path="output.gif",
-        fps=1,
-        resize=(512, 512),           # Bounding box size
-        padding_color=(0, 0, 0),     # Black background
+        image_folder=args.image_folder,
+        output_path=args.output,
+        fps=args.fps,
+        resize=tuple(args.resize) if args.resize else None,
+        padding_color=tuple(args.padding_color),
     )

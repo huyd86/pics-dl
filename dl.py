@@ -4,7 +4,7 @@ import time
 import os
 import argparse
 
-BASE_URL = 'https://dummy.org/g/123/abc/'
+BASE_URL = 'https://e-hentai.org/g/218789/d4618202db/'
 HEADERS = {
     'User-Agent': 'Mozilla/5.0'
 }
@@ -60,22 +60,24 @@ def download_image(img_url, save_dir='downloads', dry_run=False):
         else:
             print(f"Failed to download image: {img_url}")
 
-def main():
-    parser = argparse.ArgumentParser(description='image downloader with dry-run and page limit')
-    parser.add_argument('--dry-run', action='store_true', help='Only show what would be downloaded')
-    parser.add_argument('--max-pages', type=int, required=True, help='Maximum number of gallery pages to parse')
-    args = parser.parse_args()
-
-    image_page_urls = get_image_page_urls(BASE_URL, args.max_pages)
+def download_gallery_images(BASE_URL, max_pages, save_dir="downloads", dry_run=False):
+    image_page_urls = get_image_page_urls(BASE_URL, max_pages)
     print(f"Found {len(image_page_urls)} image pages.")
 
     for idx, url in enumerate(image_page_urls):
         print(f"[{idx+1}/{len(image_page_urls)}] Getting full image from {url}")
         full_img_url = get_full_image_url(url)
         if full_img_url:
-            download_image(full_img_url, dry_run=args.dry_run)
-            if not args.dry_run:
+            download_image(full_img_url, save_dir=save_dir, dry_run=dry_run)
+            if not dry_run:
                 time.sleep(1)
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='image downloader with dry-run and page limit')
+    parser.add_argument('--dry-run', action='store_true', help='Only show what would be downloaded')
+    parser.add_argument('--max-pages', type=int, required=True, help='Maximum number of gallery pages to parse')
+    parser.add_argument('--base-url', type=str, default=BASE_URL, help='Gallery base URL')
+    parser.add_argument('--save-dir', type=str, default='downloads', help='Directory to save images')
+    args = parser.parse_args()
+
+    download_gallery_images(args.base_url, args.max_pages, save_dir=args.save_dir, dry_run=args.dry_run)
