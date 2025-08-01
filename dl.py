@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import time
 import os
 import argparse
+import logging
+from requests.exceptions import SSLError
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0'
@@ -51,13 +53,18 @@ def download_image(img_url, save_dir='downloads', dry_run=False):
         print(f"[DRY RUN] Would download: {img_url} -> {filename}")
     else:
         print(f"Downloading: {img_url}")
-        res = requests.get(img_url, headers=HEADERS)
-        if res.status_code == 200:
-            with open(filename, 'wb') as f:
-                f.write(res.content)
-            print(f"Saved to: {filename}")
-        else:
-            print(f"Failed to download image: {img_url}")
+        try:
+            res = requests.get(img_url, headers=HEADERS)
+            if res.status_code == 200:
+                with open(filename, 'wb') as f:
+                    f.write(res.content)
+                print(f"Saved to: {filename}")
+            else:
+                print(f"Failed to download image: {img_url}")
+        except SSLError as ssl_err:
+            logging.warning(f"SSL error while downloading {img_url}: {ssl_err}. Skipping...")
+        except Exception as e:
+            logging.error(f"Error while downloading {img_url}: {e}. Skipping...")
 
 def download_gallery_images(base_url, max_pages, save_dir="downloads", dry_run=False):
     image_page_urls = get_image_page_urls(base_url, max_pages)
