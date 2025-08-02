@@ -104,7 +104,7 @@ def download_gallery_images(base_url, max_pages, save_dir="downloads", dry_run=F
         if full_img_url:
             downloaded = download_image(full_img_url, save_dir=save_dir, dry_run=dry_run, timeout=timeout)
             if downloaded:
-                time.sleep(1)
+                time.sleep(0.5)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='image downloader with dry-run and page limit')

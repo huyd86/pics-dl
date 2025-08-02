@@ -17,6 +17,7 @@ def process_row(url, max_pages, gif_name):
         output_path=gif_name,
         resize=(512, 512),
         fps=1,              # Adjust as necessary
+        chunk_size=180,
         padding_color=(0,0,0)
     )
     print(f"GIF created: {gif_name}\n")
