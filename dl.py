@@ -10,6 +10,16 @@ HEADERS = {
     'User-Agent': 'Mozilla/5.0'
 }
 
+# Add logging to both console and file:
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('errors.log', mode='a', encoding='utf-8')
+    ]
+)
+
 def get_image_page_urls(gallery_base_url, max_pages):
     all_image_pages = []
 
@@ -66,14 +76,22 @@ def download_image(img_url, save_dir='downloads', dry_run=False, timeout=10):
             print(f"Saved to: {filename}")
             return True
         else:
-            print(f"Failed to download image: {img_url}")
+            err_msg = f"Failed to download image: {img_url} (status: {res.status_code})"
+            print(err_msg)
+            logging.error(err_msg)
             return False
     except SSLError as ssl_err:
-        logging.warning(f"SSL error while downloading {img_url}: {ssl_err}. Skipping...")
+        err_msg = f"SSL error while downloading {img_url}: {ssl_err}. Skipping..."
+        print(err_msg)
+        logging.warning(err_msg)
     except requests.exceptions.Timeout:
-        logging.warning(f"Timeout while downloading {img_url}. Skipping...")
+        err_msg = f"Timeout while downloading {img_url}. Skipping..."
+        print(err_msg)
+        logging.warning(err_msg)
     except Exception as e:
-        logging.error(f"Error while downloading {img_url}: {e}. Skipping...")
+        err_msg = f"Error while downloading {img_url}: {e}. Skipping..."
+        print(err_msg)
+        logging.error(err_msg)
     return False
 
 def download_gallery_images(base_url, max_pages, save_dir="downloads", dry_run=False, timeout=10):
