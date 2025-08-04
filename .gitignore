@@ -42,6 +42,8 @@ downloads/
 images/
 queue.txt
 urls.txt
+fetch*galleries.py
+galleries.txt
 
 # Temporary data/cache
 *.bak
