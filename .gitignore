@@ -40,10 +40,11 @@ Thumbs.db
 # Optional: comment out if you want to commit downloaded images
 downloads/
 images/
+queue/
 queue.txt
 urls.txt
 fetch*galleries.py
-galleries.txt
+*galleries.txt
 
 # Temporary data/cache
 *.bak
